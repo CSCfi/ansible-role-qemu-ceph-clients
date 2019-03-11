@@ -1,0 +1,13 @@
+---
+- name: Upload verification script
+  copy:
+    src: "files/ceph-version-qemu.sh"
+    dest: "/root/ceph-version-qemu.sh"
+    owner: root
+    group: root
+    mode: 500
+  tags: script
+  no_log: true
+- name: Run verification script
+  shell: /root/ceph-version-qemu.sh
+  changed_when: False
