@@ -4,10 +4,14 @@
 CEPH_MAJORVER_EXPECTED_OLD=10
 CEPH_MAJORVER_EXPECTED_NEW=12
 
-# Major version to scan for that Ceph was upgraded from.
-CEPH_MAJORVER_EXPECTED_OLD=$1
-# Major version to scan for that Ceph was upgraded to.
-CEPH_MAJORVER_EXPECTED_NEW=$2
+# Expect that Ceph was upgraded from major version $1
+if [ -z ${CEPH_MAJORVER_EXPECTED_OLD+x} ]; then
+  CEPH_MAJORVER_EXPECTED_OLD=$1
+fi
+# Expect that Ceph was upgraded from major version $2
+if [ -z ${CEPH_MAJORVER_EXPECTED_NEW+x} ]; then
+  CEPH_MAJORVER_EXPECTED_NEW=$2
+fi
 
 YUM_HISTORY_EVENTS=$(yum history|grep -E '^  '|awk '{print $1}')
 
@@ -24,7 +28,7 @@ done
 
 PIDS=$(pidof /usr/libexec/qemu-kvm)
 
-for PID in $PIDS; do 
+for PID in $PIDS; do
   QEMU_TIMESTAMP=$(date -d "$(stat -c %x /proc/$PID/stat)" +%s)
   if [[ "$QEMU_TIMESTAMP" -lt "$CEPH_UPGRADE_TIMESTAMP" ]]
   then
