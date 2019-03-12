@@ -30,9 +30,11 @@ PIDS=$(pidof /usr/libexec/qemu-kvm)
 
 for PID in $PIDS; do
   QEMU_TIMESTAMP=$(date -d "$(stat -c %x /proc/$PID/stat)" +%s)
-  if [[ "$QEMU_TIMESTAMP" -lt "$CEPH_UPGRADE_TIMESTAMP" ]]
+  INSTANCE_NAME=$(ps -ef -q $PID|grep -Po "(instance-\w+)"|uniq)
+  INSTANCE_QEMU_MON_RBD=$(virsh qemu-monitor-command --hmp "$INSTANCE_NAME" 'info block'|grep rbd)
+  INSTANCE_USE_RBD=$?
+  if [[ "$QEMU_TIMESTAMP" -lt "$CEPH_UPGRADE_TIMESTAMP" ]] && [ "$INSTANCE_USE_RBD" -eq "0" ]
   then
-    INSTANCE_NAME=$(ps -ef -q $PID|grep -Po "(instance-\w+)"|uniq)
     INSTANCE_UUID=$(virsh dumpxml $INSTANCE_NAME|grep \/uuid|awk -F'>' "{print \$2}"|awk -F'<' "{print \$1}")
     echo $INSTANCE_UUID
   fi
