@@ -37,6 +37,8 @@ for PID in $PIDS; do
   then
     INSTANCE_UUID=$(virsh dumpxml $INSTANCE_NAME|grep \/uuid|awk -F'>' "{print \$2}"|awk -F'<' "{print \$1}")
     echo $INSTANCE_UUID
+    #INSTANCE_QEMU_MON_RBD_COUNT=$(virsh qemu-monitor-command --hmp "$INSTANCE_NAME" 'info block'|grep -c rbd)
+    #echo "DEBUG: $INSTANCE_UUID has $INSTANCE_QEMU_MON_RBD_COUNT RBD devices configured"
   fi
 done
 
