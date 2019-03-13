@@ -9,5 +9,5 @@
   tags: script
   no_log: true
 - name: Run verification script
-  shell: /root/ceph-version-qemu.sh
+  shell: /root/ceph-version-qemu.sh "{{ (script_debug == true) | ternary('-d','') }}"
   changed_when: False

@@ -9,7 +9,7 @@ DEBUG=1
 
 usage() { echo "Usage: $0 [-o 10] [-n 12] [-e] [-d]" 1>&2; exit 1; }
 
-while getopts ":o:n:rh" arg; do
+while getopts ":o:n:edh" arg; do
   case $arg in
     o)
        CEPH_MAJORVER_EXPECTED_OLD=$OPTARG
