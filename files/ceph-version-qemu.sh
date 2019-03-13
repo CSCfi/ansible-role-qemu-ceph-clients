@@ -3,11 +3,21 @@
 # By default, search for upgrades from Jewel to Luminous.
 CEPH_MAJORVER_EXPECTED_OLD=10
 CEPH_MAJORVER_EXPECTED_NEW=12
-# By default, exclude VMs that do not have RBD block devices attached.
-EXCLUDE_QEMU_WITHOUT_RBD=0
+# By default, include VMs which do not have RBD block devices attached.
+INCLUDE_QEMU_WITHOUT_RBD=0
+# By default, no debug
 DEBUG=1
 
-usage() { echo "Usage: $0 [-o 10] [-n 12] [-e] [-d]" 1>&2; exit 1; }
+usage() {
+  echo "Usage: $0 [-o 10] [-n 12] [-e] [-d]" 1>&2;
+  echo "" 1>&2;
+  echo "  -o, expected old ceph version" 1>&2;
+  echo "  -n, expected new ceph version" 1>&2;
+  echo "  -e, exclude VMs with no RBDs present" 1>&2;
+  echo "  -d, debug" 1>&2;
+  echo "" 1>&2;
+  exit 1
+}
 
 while getopts ":o:n:edh" arg; do
   case $arg in
@@ -18,12 +28,12 @@ while getopts ":o:n:edh" arg; do
        CEPH_MAJORVER_EXPECTED_NEW=$OPTARG
        ;;
     e)
-       EXCLUDE_QEMU_WITHOUT_RBD=1
+       INCLUDE_QEMU_WITHOUT_RBD=1
        ;;
     d)
        DEBUG=0
        ;;
-    h | *)
+    h|*)
        usage
        exit 0
        ;;
@@ -58,12 +68,12 @@ for PID in $PIDS; do
   INSTANCE_QEMU_MON_RBD=$(virsh qemu-monitor-command --hmp "$INSTANCE_NAME" 'info block'|grep rbd)
   # Save return code for determining if rbd's were present
   INSTANCE_HAS_RBD=$?
-  # Check if configuration says that QEMUs not having RBD devices should be excluded.
-  if [[ "$EXCLUDE_QEMU_WITHOUT_RBD" -eq "0" ]]
+  # Check if instance did NOT have RBDs
+  if [[ "$INSTANCE_HAS_RBD" -ne "0" ]]
   then
-    if [[ "$INSTANCE_HAS_RBD" -ne "0" ]]
+    # Check if we should not report on these type of instances
+    if [[ "$INCLUDE_QEMU_WITHOUT_RBD" -ne "0" ]]
     then
-      # If this instance didn't have RBD's, disregard it.
       break
     fi
   fi
@@ -81,4 +91,3 @@ for PID in $PIDS; do
     fi
   fi
 done
-
