@@ -3,15 +3,32 @@
 # By default, search for upgrades from Jewel to Luminous.
 CEPH_MAJORVER_EXPECTED_OLD=10
 CEPH_MAJORVER_EXPECTED_NEW=12
+# By default, exclude VMs that do not have RBD block devices attached.
+EXCLUDE_QEMU_WITHOUT_RBD=0
+DEBUG=1
 
-# Expect that Ceph was upgraded from major version $1
-if [ -z ${CEPH_MAJORVER_EXPECTED_OLD+x} ]; then
-  CEPH_MAJORVER_EXPECTED_OLD=$1
-fi
-# Expect that Ceph was upgraded from major version $2
-if [ -z ${CEPH_MAJORVER_EXPECTED_NEW+x} ]; then
-  CEPH_MAJORVER_EXPECTED_NEW=$2
-fi
+usage() { echo "Usage: $0 [-o 10] [-n 12] [-e] [-d]" 1>&2; exit 1; }
+
+while getopts ":o:n:rh" arg; do
+  case $arg in
+    o)
+       CEPH_MAJORVER_EXPECTED_OLD=$OPTARG
+       ;;
+    n)
+       CEPH_MAJORVER_EXPECTED_NEW=$OPTARG
+       ;;
+    e)
+       EXCLUDE_QEMU_WITHOUT_RBD=1
+       ;;
+    d)
+       DEBUG=0
+       ;;
+    h | *)
+       usage
+       exit 0
+       ;;
+  esac
+done
 
 # Retrieve a list of all yum history event IDs
 YUM_HISTORY_EVENTS=$(yum history list all|grep -Po "^\s+\d+")
@@ -40,19 +57,28 @@ for PID in $PIDS; do
   # Look for presence of block devices with "rbd" driver (as opposed to "raw" for local)
   INSTANCE_QEMU_MON_RBD=$(virsh qemu-monitor-command --hmp "$INSTANCE_NAME" 'info block'|grep rbd)
   # Save return code for determining if rbd's were present
-  INSTANCE_USE_RBD=$?
-  # If QEMU process has been running before the Ceph upgrade and instance uses a RBD driver,
-  # then with rather good probability it's running the old Ceph client version.
-  if [[ "$QEMU_TIMESTAMP" -lt "$CEPH_UPGRADE_TIMESTAMP" ]] && [ "$INSTANCE_USE_RBD" -eq "0" ]
+  INSTANCE_HAS_RBD=$?
+  # Check if configuration says that QEMUs not having RBD devices should be excluded.
+  if [[ "$EXCLUDE_QEMU_WITHOUT_RBD" -eq "0" ]]
   then
-    # Print out the instance UUID for further processing
+    if [[ "$INSTANCE_HAS_RBD" -ne "0" ]]
+    then
+      # If this instance didn't have RBD's, disregard it.
+      break
+    fi
+  fi
+
+  # Check if QEMU process has been running before the Ceph upgrade
+  if [[ "$QEMU_TIMESTAMP" -lt "$CEPH_UPGRADE_TIMESTAMP" ]]
+  then
+    # If it did, print out the instance UUID.
     INSTANCE_UUID=$(virsh dumpxml $INSTANCE_NAME|grep \/uuid|awk -F'>' "{print \$2}"|awk -F'<' "{print \$1}")
     echo $INSTANCE_UUID
-    # The following two lines can be uncommented if one is also interested about the overall
-    # number of RBDs (volume attachments), since that seems to correlate best to the number
-    # of clients that ceph-mgr is seeing.
-    #INSTANCE_QEMU_MON_RBD_COUNT=$(virsh qemu-monitor-command --hmp "$INSTANCE_NAME" 'info block'|grep -c rbd)
-    #echo "DEBUG: $INSTANCE_UUID has this many RBD devices configured: $INSTANCE_QEMU_MON_RBD_COUNT"
+    if [[ "$DEBUG" -eq "0" ]]
+    then
+      INSTANCE_QEMU_MON_RBD_COUNT=$(virsh qemu-monitor-command --hmp "$INSTANCE_NAME" 'info block'|grep -c rbd)
+      echo "DEBUG: $INSTANCE_UUID has this many RBD devices configured: $INSTANCE_QEMU_MON_RBD_COUNT"
+    fi
   fi
 done
 
