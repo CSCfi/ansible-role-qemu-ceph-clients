@@ -13,7 +13,7 @@ usage() {
   echo "" 1>&2;
   echo "  -o, expected old ceph version" 1>&2;
   echo "  -n, expected new ceph version" 1>&2;
-  echo "  -e, exclude VMs with no RBDs present" 1>&2;
+  echo "  -e, exclude QEMUs with no RBDs present" 1>&2;
   echo "  -d, debug" 1>&2;
   echo "" 1>&2;
   exit 1
