@@ -9,5 +9,5 @@
   tags: script
   no_log: true
 - name: Run verification script
-  shell: /root/ceph-version-qemu.sh "{{ '-e' if exclude_qemu_without_rbd else '' }}" "{{ '-d' if script_debug_output else '' }}"
+  shell: "/root/ceph-version-qemu.sh {{ '-e' if exclude_qemu_without_rbd else '' }} {{ '-d' if script_debug_output else '' }}"
   changed_when: False
