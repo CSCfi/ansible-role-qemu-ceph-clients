@@ -1,2 +1,4 @@
 ---
 # defaults file for ansible-role-qemu-ceph-clients
+script_debug_output: false
+exclude_qemu_without_rbd: false
