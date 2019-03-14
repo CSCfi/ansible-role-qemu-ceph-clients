@@ -1,4 +1,2 @@
 ---
 # vars file for ansible-role-qemu-ceph-clients
-script_debug: false
-exclude_no_rbd: false
