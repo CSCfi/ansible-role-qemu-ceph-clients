@@ -1,11 +1,13 @@
 #!/bin/bash
+# Managed with Ansible
 
-# By default, search for upgrades from Jewel to Luminous.
+# DEFAULTS
+# Search for upgrades from Jewel to Luminous.
 CEPH_MAJORVER_EXPECTED_OLD=10
 CEPH_MAJORVER_EXPECTED_NEW=12
-# By default, include VMs which do not have RBD block devices attached.
-INCLUDE_QEMU_WITHOUT_RBD=0
-# By default, no debug
+# QEMUs with no Rados Block Devices (RBD) are included in the results.
+EXCLUDE_QEMU_WITHOUT_RBD=1
+# No debug logging.
 DEBUG=1
 
 usage() {
@@ -13,7 +15,7 @@ usage() {
   echo "" 1>&2;
   echo "  -o, expected old ceph version" 1>&2;
   echo "  -n, expected new ceph version" 1>&2;
-  echo "  -e, exclude QEMUs with no RBDs present" 1>&2;
+  echo "  -e, exclude QEMUs with no RBDs" 1>&2;
   echo "  -d, debug" 1>&2;
   echo "" 1>&2;
   exit 1
@@ -28,7 +30,7 @@ while getopts ":o:n:edh" arg; do
        CEPH_MAJORVER_EXPECTED_NEW=$OPTARG
        ;;
     e)
-       INCLUDE_QEMU_WITHOUT_RBD=1
+       EXCLUDE_QEMU_WITHOUT_RBD=0
        ;;
     d)
        DEBUG=0
@@ -71,8 +73,8 @@ for PID in $PIDS; do
   # Check if instance did NOT have RBDs
   if [[ "$INSTANCE_HAS_RBD" -ne "0" ]]
   then
-    # Check if we should not report on these type of instances
-    if [[ "$INCLUDE_QEMU_WITHOUT_RBD" -ne "0" ]]
+    # Check if these type of instances should be excluded from search results
+    if [[ "$EXCLUDE_QEMU_WITHOUT_RBD" -eq "0" ]]
     then
       break
     fi
