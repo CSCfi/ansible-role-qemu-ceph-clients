@@ -2,5 +2,10 @@
 - hosts: all
   remote_user: root
   become: true
+  pre_tasks:
+    - name: install dependencies not available in centos docker image
+      package:
+        name: "{{ 'sysvinit-utils' if ansible_os_family == 'Debian' else 'sysvinit-tools' }}"
+        state: installed
   roles:
     - ansible-role-qemu-ceph-clients
