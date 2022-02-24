@@ -2,9 +2,9 @@
 # Managed with Ansible
 
 # DEFAULTS
-# Search for upgrades from Jewel to Luminous.
-CEPH_MAJORVER_EXPECTED_OLD=10
-CEPH_MAJORVER_EXPECTED_NEW=12
+# Search for upgrades from Luminous to Nautilus.
+CEPH_MAJORVER_EXPECTED_OLD=12
+CEPH_MAJORVER_EXPECTED_NEW=14
 # QEMUs with no Rados Block Devices (RBD) are included in the results.
 EXCLUDE_QEMU_WITHOUT_RBD=1
 # No debug logging.
