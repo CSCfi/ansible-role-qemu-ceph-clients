@@ -30,7 +30,7 @@ while getopts ":o:n:edh" arg; do
        CEPH_MAJORVER_EXPECTED_NEW=$OPTARG
        ;;
     e)
-       EXCLUDE_QEMU_WITHOUT_RBD=0
+       INCLUDE_QEMU_WITHOUT_RBD=0
        ;;
     d)
        DEBUG=0
@@ -47,7 +47,7 @@ YUM_HISTORY_EVENTS=$(yum history list all|grep -Po "^\s+\d+")
 
 for YUM_HISTORY_EVENT in $YUM_HISTORY_EVENTS; do
   CEPH_MAJORVER_OLD=$(yum history info $YUM_HISTORY_EVENT|grep -A1 ceph-common|head -1|awk -F':' '{print $2}'|awk -F'.' '{print $1}')
-  CEPH_MAJORVER_NEW=$(yum history info $YUM_HISTORY_EVENT|grep -A1 ceph-common|tail -1|awk -F':' '{print $3}'|awk -F'.' '{print $1}')
+  CEPH_MAJORVER_NEW=$(yum history info $YUM_HISTORY_EVENT|grep -A1 ceph-common|tail -1|awk -F':' '{print $2}'|awk -F'.' '{print $1}')
   # See if this event matches the upgrade path we're looking for
   if [[ "$CEPH_MAJORVER_OLD" == "$CEPH_MAJORVER_EXPECTED_OLD" ]] && [[ "$CEPH_MAJORVER_NEW" == "$CEPH_MAJORVER_EXPECTED_NEW" ]]
   then
