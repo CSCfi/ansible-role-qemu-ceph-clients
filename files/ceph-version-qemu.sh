@@ -6,7 +6,7 @@
 CEPH_MAJORVER_EXPECTED_OLD=12
 CEPH_MAJORVER_EXPECTED_NEW=14
 # QEMUs with no Rados Block Devices (RBD) are included in the results.
-INCLUDE_QEMU_WITHOUT_RBD=1
+EXCLUDE_QEMU_WITHOUT_RBD=1
 # No debug logging.
 DEBUG=1
 
@@ -30,7 +30,7 @@ while getopts ":o:n:edh" arg; do
        CEPH_MAJORVER_EXPECTED_NEW=$OPTARG
        ;;
     e)
-       INCLUDE_QEMU_WITHOUT_RBD=0
+       EXCLUDE_QEMU_WITHOUT_RBD=0
        ;;
     d)
        DEBUG=0
@@ -74,7 +74,7 @@ for PID in $PIDS; do
   if [[ "$INSTANCE_HAS_RBD" -ne "0" ]]
   then
     # Check if these type of instances should be excluded from search results
-    if [[ "$INCLUDE_QEMU_WITHOUT_RBD" -eq "0" ]]
+    if [[ "$EXCLUDE_QEMU_WITHOUT_RBD" -eq "0" ]]
     then
       break
     fi
