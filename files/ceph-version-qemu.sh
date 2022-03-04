@@ -73,10 +73,10 @@ for PID in $PIDS; do
   # Check if instance did NOT have RBDs
   if [[ "$INSTANCE_HAS_RBD" -ne "0" ]]
   then
-    # Check if these type of instances should be excluded from search results
+    # Check if this type of instance should be excluded from search results
     if [[ "$EXCLUDE_QEMU_WITHOUT_RBD" -eq "0" ]]
     then
-      break
+      continue
     fi
   fi
 
