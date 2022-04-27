@@ -59,7 +59,11 @@ for YUM_HISTORY_EVENT in $YUM_HISTORY_EVENTS; do
 done
 
 # Retrieve a list of all QEMU process IDs
-PIDS=$(pidof /usr/libexec/qemu-kvm)
+# The pidof command can be used when this bug is fixed 
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=926896
+# PIDS=$(pidof /usr/libexec/qemu-kvm)
+PIDS=$(ps aux | grep qemu| awk -F' ' '{print $2}'| tail -n +2)
+
 
 for PID in $PIDS; do
   # Get QEMU process start time
