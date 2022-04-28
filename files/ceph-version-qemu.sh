@@ -62,8 +62,7 @@ done
 # The pidof command can be used when this bug is fixed 
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=926896
 # PIDS=$(pidof /usr/libexec/qemu-kvm)
-PIDS=$(ps aux | grep qemu| awk -F' ' '{print $2}'| tail -n +2)
-
+PIDS=$(ps aux | grep -v root |  grep qemu| awk -F' ' '{print $2}')
 
 for PID in $PIDS; do
   # Get QEMU process start time
