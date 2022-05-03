@@ -59,7 +59,7 @@ for YUM_HISTORY_EVENT in $YUM_HISTORY_EVENTS; do
 done
 
 # Retrieve a list of all QEMU process IDs
-PIDS=$(pidof /usr/libexec/qemu-kvm)
+PIDS=$(pgrep -f "^/usr/libexec/qemu-kvm")
 
 for PID in $PIDS; do
   # Get QEMU process start time
